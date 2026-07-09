@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>¡Tus 10 Premios!</title>
+    <style>
+        body { background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; padding-top: 50px; font-family: sans-serif; text-align: center; }
+        #bloque-toque { width: 280px; height: 280px; background: #475569; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border: 4px solid #94a3b8; transition: transform 0.1s; }
+        #bloque-toque:active { transform: scale(0.95); }
+        #historial { margin-top: 20px; width: 80%; }
+        .firma-alex { margin-top: 40px; font-style: italic; color: rgba(255, 255, 255, 0.4); font-size: 24px; }
+    </style>
+</head>
+<body>
+
+    <h2 id="titulo">¡Toca 10 veces el cofre!</h2>
+    <div id="bloque-toque">
+        <div style="font-size: 50px;">🎁</div>
+        <div id="contador" style="font-size: 24px; font-weight: bold;">10</div>
+    </div>
+    
+    <div id="historial">
+        <h3 id="subtitulo">Premios obtenidos:</h3>
+        <div id="lista-premios" style="font-size: 20px;"></div>
+    </div>
+
+    <div class="firma-alex">Alex.</div>
+
+    <script>
+        const bloque = document.getElementById('bloque-toque');
+        const contadorDisplay = document.getElementById('contador');
+        const listaPremios = document.getElementById('lista-premios');
+        const titulo = document.getElementById('titulo');
+
+        const premiosPosibles = [
+            { nombre: "Traje de pez 🐟", prob: 0.50 },
+            { nombre: "Chef 🧑‍🍳", prob: 0.25 },
+            { nombre: "Verano ☀️🍹", prob: 0.15 },
+            { nombre: "Sushi 🍣", prob: 0.09 },
+            { nombre: "Sushi de oro 🍣🪙", prob: 0.01 }
+        ];
+
+        // Cargar datos guardados
+        let historialGanado = JSON.parse(localStorage.getItem("historialPremios")) || [];
+        let toquesRestantes = 10 - historialGanado.length;
+
+        function mostrarHistorial() {
+            listaPremios.innerHTML = historialGanado.map(p => `<div>✅ ${p}</div>`).join('');
+            if (historialGanado.length > 0) {
+                bloque.style.display = 'none';
+                titulo.innerText = "¡Tus premios ya fueron reclamados!";
+            }
+        }
+
+        function obtenerPremio() {
+            let azar = Math.random();
+            let acumulado = 0;
+            for(let p of premiosPosibles) {
+                acumulado += p.prob;
+                if(azar <= acumulado) return p.nombre;
+            }
+        }
+
+        bloque.addEventListener('click', () => {
+            if (toquesRestantes > 0) {
+                let premio = obtenerPremio();
+                historialGanado.push(premio);
+                toquesRestantes--;
+                contadorDisplay.innerText = toquesRestantes;
+                listaPremios.innerHTML += `<div>✅ ${premio}</div>`;
+
+                if (toquesRestantes === 0) {
+                    localStorage.setItem("historialPremios", JSON.stringify(historialGanado));
+                    bloque.style.display = 'none';
+                    titulo.innerText = "¡Mándale captura a Alex!";
+                }
+            }
+        });
+
+        mostrarHistorial();
+    </script>
+</body>
+</html>
